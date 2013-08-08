@@ -1,0 +1,32 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2013-08-08T12:33:11+03:00
+
+====== On 1C server ======
+Created Чацвер 08 Жнівень 2013
+
+"remote desktop licensing manager"
+	select host && action -> activate server
+		webserver !!!
+		activate license server
+	
+
+prod id 00496-001-7214975-84311
+
+john malkovicz
+
+john malkovicz and son
+
+usa
+
+
+license server id JRPGM-TQBT8-HPMX3-M2QD7-DGMK8-37KRP-V68HC
+
+licence program other !!!
+
+ws2k8 r2 rds per device cal or ws2k8 ts per dev cal
+
+agreement no 6565792license pack id RC3PQ-R4M3D-Y9FPK-F74CR-YQGHW-4WVX4-YQMH8
+
+"remote desktop session host configuration"
+	remote desktop licensing mode -> per device && select our host

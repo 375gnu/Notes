@@ -1,0 +1,34 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2013-08-08T12:33:33+03:00
+
+====== Logout script ======
+Created Чацвер 08 Жнівень 2013
+
+FOR /F "usebackq skip=3 tokens=1-5" %%a in (`query session`) DO CALL :check %%a %%b %%c %%d %%e
+exit /b
+
+:check
+	set "u1=%1"
+	set "u2=%2"
+	set "u3=%3"
+	set "u4=%4"
+	set "u5=%5"
+
+	IF "%u5%"=="rdpwd" (
+		REM active rdp session
+		IF "%u4%"=="Active" (
+			FOR /F %%a in (EstaffUsers.txt) DO IF %%a==%u2% echo Logoff %u3%
+		) ELSE (
+			CALL :log "Unknown session state: %u4%"
+		)
+	) ELSE (
+		REM disconnected rdp session
+		IF "%u3%"=="Disc" (
+			FOR /F %%a in (EstaffUsers.txt) DO IF %%a==%u1% echo Logoff %u2%
+		) else (
+			CALL :log "Unknown session state: %u3%"
+		)
+	)
+
+	GOTO [[:eof]]
