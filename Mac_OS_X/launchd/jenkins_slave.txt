@@ -1,0 +1,32 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2013-08-08T17:47:52+03:00
+
+====== jenkins slave ======
+Created Чацвер 08 Жнівень 2013
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>Jenkins</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/java</string>
+    <string>-Djava.awt.headless=true</string>
+    <string>-jar</string>
+    <string>/Users/Jenkins/jenkins/slave.jar</string>
+    <string>-jnlpUrl</string>
+    <string>http://192.168.93.31:8080/jenkins/computer/iOS-Slave/slave-agent.jnlp</string>
+    <string>-secret</string>
+    <string>5380c5f167a0f9a9771c8c1ab586322027a6122c2beafef9140f43e98017d47a</string>
+  </array>
+  <key>OnDemand</key>
+  <false/>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>UserName</key>
+  <string>Jenkins</string>
+</dict>
+</plist>

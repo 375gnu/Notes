@@ -1,0 +1,7 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2013-08-08T17:47:35+03:00
+
+====== Mac OS X ======
+Created Чацвер 08 Жнівень 2013
+
