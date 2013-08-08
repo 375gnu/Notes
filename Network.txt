@@ -1,0 +1,10 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2013-08-08T12:35:05+03:00
+
+====== Network ======
+Created Чацвер 08 Жнівень 2013
+
+Запустить процесс с личным сетевым стеком можно с помощью unshare -n command (util-linux-ng).
+
+Перенести интерфейс из основного стека в личный можно с помощью ip link set eth3 netns command-pid (iproute2).
