@@ -28,5 +28,11 @@ Created Чацвер 08 Жнівень 2013
   <true/>
   <key>UserName</key>
   <string>Jenkins</string>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Developer/jenkins/stdout.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Developer/jenkins/error.log</string>
 </dict>
 </plist>
