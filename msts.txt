@@ -5,6 +5,8 @@ Creation-Date: 2013-08-08T12:29:00+03:00
 ====== msts ======
 Created Чацвер 08 Жнівень 2013
 
+===== Multiuser setup =====
+
 Please note to use these licenses only for educational and testing use.
 1. SERVER Start > Control Panel > Add or Remove Programs > Add or Remove
 Windows Components'. Add "Terminal Server" & Terminal Server Licensing"
@@ -40,3 +42,61 @@ quantity (I put around 100) and Agreement Number 6565792
 insert to Terminal Server CAL Installation Wizard > close window do not press
 finish, but first write down license key pack ID
 17.SERVER Insert license key pack ID into your server and finish wizard
+
+===== On 1C server =====
+
+"remote desktop licensing manager"
+	select host && action -> activate server
+		webserver !!!
+		activate license server
+	
+
+prod id 00496-001-7214975-84311
+
+john malkovicz
+
+john malkovicz and son
+
+usa
+
+
+license server id JRPGM-TQBT8-HPMX3-M2QD7-DGMK8-37KRP-V68HC
+
+licence program other !!!
+
+ws2k8 r2 rds per device cal or ws2k8 ts per dev cal
+
+agreement no 6565792license pack id RC3PQ-R4M3D-Y9FPK-F74CR-YQGHW-4WVX4-YQMH8
+
+"remote desktop session host configuration"
+	remote desktop licensing mode -> per device && select our host
+
+===== msts logout script =====
+
+FOR /F "usebackq skip=3 tokens=1-5" %%a in (`query session`) DO CALL :check %%a %%b %%c %%d %%e
+exit /b
+
+:check
+	set "u1=%1"
+	set "u2=%2"
+	set "u3=%3"
+	set "u4=%4"
+	set "u5=%5"
+
+	IF "%u5%"=="rdpwd" (
+		REM active rdp session
+		IF "%u4%"=="Active" (
+			FOR /F %%a in (EstaffUsers.txt) DO IF %%a==%u2% echo Logoff %u3%
+		) ELSE (
+			CALL :log "Unknown session state: %u4%"
+		)
+	) ELSE (
+		REM disconnected rdp session
+		IF "%u3%"=="Disc" (
+			FOR /F %%a in (EstaffUsers.txt) DO IF %%a==%u1% echo Logoff %u2%
+		) else (
+			CALL :log "Unknown session state: %u3%"
+		)
+	)
+
+	GOTO :eof
