@@ -31,8 +31,8 @@ Created Чацвер 08 Жнівень 2013
   <key>KeepAlive</key>
   <true/>
   <key>StandardOutPath</key>
-  <string>/Developer/jenkins/stdout.log</string>
+  <string>/Users/Jenkins/jenkins/stdout.log</string>
   <key>StandardErrorPath</key>
-  <string>/Developer/jenkins/error.log</string>
+  <string>/Users/Jenkins/jenkins/error.log</string>
 </dict>
 </plist>
