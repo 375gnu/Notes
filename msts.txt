@@ -1,0 +1,42 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2013-08-08T12:29:00+03:00
+
+====== msts ======
+Created Чацвер 08 Жнівень 2013
+
+Please note to use these licenses only for educational and testing use.
+1. SERVER Start > Control Panel > Add or Remove Programs > Add or Remove
+Windows Components'. Add "Terminal Server" & Terminal Server Licensing"
+Default licensing mode is per device as we will need to for actiivation
+2. SERVER Start Terminal Server Licensing (Start > Control Panel > Administrative
+Tools > Services >Terminal Server Licensing) if it is not started
+3. SERVER Go to the Terminal Server Licensing, Right-click on Terminal Server >
+Properties > Installation Method:
+Select Installation Method "Web Browser"
+4. SERVER Go to next tab "Required Information". Fill all 4 fields with some none
+important information. Write somewhere TS ID on the bottom of that window
+5. SERVER Right-click on Terminal Server and select Activate Server. Terminal
+Server License Server Activation Wizard will start. Read > press next
+6. SERVER Select activation method "Web Browser" press next
+7. WEB BROWSER Go to https://activate.microsoft.com/ to get license server ID
+8. WEB BROWSER Select "Activate a license server" press next
+9. WEB BROWSER Fill out required fields with some information that makes sense.
+Choose country USA. Use Product ID use from step 6, press next on the bottom
+10.WEB BROWSER Press next one more time on the bottom
+11.WEB BROWSER If you did every thing right then you gonna get license server ID
+key (enter this information in your terminal server activation window), but
+do not close window we will need this for client access licenses (CALs). If
+everything is OK you will now have Terminal Server License Server Activated.
+12.WEB BROWSER Next in the "Do you wish to install license tokens at this time?"
+select "Yes"
+13.WEB BROWSER Fill out the required fields on the Microsoft web page . License
+Server ID get from Terminal Server CAL Installation Wizard. Important is to set
+License Program to "Other agreement".
+14.WEB BROWSER Choose Product Type Windows 2003 Terminal server Per Device CAL, Fill
+quantity (I put around 100) and Agreement Number 6565792
+15.WEB BROWSER Press next once more on the bottom
+16.WEB BROWSER you are gonna get your license key pack ID what you need to
+insert to Terminal Server CAL Installation Wizard > close window do not press
+finish, but first write down license key pack ID
+17.SERVER Insert license key pack ID into your server and finish wizard
