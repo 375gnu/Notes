@@ -1,0 +1,26 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2013-08-19T18:59:07+03:00
+
+====== TODO ======
+Created Панядзелак 19 Жнівень 2013
+
+ Unable to migrate to dependency-based boot system 
+
+Tests have determined that problems in the boot system exist which prevent migration to dependency-based
+ boot sequencing: 
+
+insserv: warning: script 'K30alfresco340' missing LSB tags and overrides, insserv: warning: script
+'K30alfresco' missing LSB tags and overrides, insserv: warning: script 'S93xwiki' missing LSB tags and
+overrides, insserv: warning: script 'S78_cms8' missing LSB tags and overrides, insserv: warning: script
+'cms8_start' missing LSB tags and overrides, insserv: warning: script 'alfresco' missing LSB tags and
+overrides, insserv: warning: script 'alfresco340' missing LSB tags and overrides, , package apcupsd removed
+but not purged, package gpm removed but not purged, package hal removed but not purged, package upsd removed
+but not purged
+
+If the reported problem is a local modification, it needs to be fixed manually. If it's a bug in the
+package, it should be reported to the BTS and fixed in the package. See
+http://wiki.debian.org/LSBInitScripts/DependencyBasedBoot for more information about how to fix the problems
+preventing migration.
+
+To reattempt the migration process after the problems have been fixed, run "dpkg-reconfigure sysv-rc". 
