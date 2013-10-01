@@ -1,0 +1,12 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2013-10-01T17:56:25+03:00
+
+====== Samba ======
+Created Аўторак 01 Кастрычнік 2013
+
+smbclient -Wworkgroup -Uusername //host/share/
+> prompt # disable confirmation
+> recurse # get data recursively
+> cd where/ever/you/need
+> mget what-ever-you-want
