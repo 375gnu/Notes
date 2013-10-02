@@ -1,0 +1,17 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2013-10-02T13:43:48+03:00
+
+====== Solaris ======
+Created Серада 02 Кастрычнік 2013
+
+//Bind mount://
+mount -F lofs <from> <where>
+
+//Reinstall GRUB://
+load livecd (livesession of installcd)
+installgrub -m /boot/grub/stage1 /boot/grub/stage2 [[/dev/rdsk/<your]] slice>
+**important**: use [[/dev/rdsk/]] not a [[/dev/dsk!]]
+
+//show current disks (workaroud)://
+iostat -En
