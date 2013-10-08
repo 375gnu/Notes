@@ -31,4 +31,4 @@ exit /b
 		)
 	)
 
-	GOTO [[:eof]]
+	GOTO :eof

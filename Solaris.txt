@@ -15,3 +15,9 @@ installgrub -m /boot/grub/stage1 /boot/grub/stage2 [[/dev/rdsk/<your]] slice>
 
 //show current disks (workaroud)://
 iostat -En
+
+//Adding a Service to SMF://
+cd [[/var/svc/manifest/<where/you/put/it]]>
+xmllint --valid [[./<your-service]]>.xml
+svccfg validate ./[[./<your-service|<your-service]]>.xml
+svccfg import ./[[./<your-service|<your-service]]>.xml
