@@ -1,0 +1,24 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2013-10-08T17:51:26+03:00
+
+====== DB2 ======
+Created Аўторак 08 Кастрычнік 2013
+
+//Right voodoo way to drop db//:
+db2 force applications all 
+db2 terminate 
+
+db2set DB2COMM= 
+db2stop 
+db2start 
+
+db2 force applications all 
+db2 terminate 
+
+... do your stuff here ...
+
+db2set DB2COMM=TCPIP 
+db2stop 
+db2start 
+http://serverfault.com/questions/79027/drop-database-on-db2-9-5-sql1035n-the-database-is-currently-in-use
