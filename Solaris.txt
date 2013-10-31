@@ -21,3 +21,7 @@ cd [[/var/svc/manifest/<where/you/put/it]]>
 xmllint --valid [[./<your-service]]>.xml
 svccfg validate ./[[./<your-service|<your-service]]>.xml
 svccfg import ./[[./<your-service|<your-service]]>.xml
+
+//Ant on Solaris10://
+
+cp ecj.jar /usr/sfw/lib/ant
