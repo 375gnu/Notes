@@ -1,0 +1,10 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2013-12-23T13:27:45+03:00
+
+====== SIP ======
+Created Панядзелак 23 Снежань 2013
+
+SNOM300 for Asterix:
+
+Identity -> RTP -> 	RTP Encryption: OFF
