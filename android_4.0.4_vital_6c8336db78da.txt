@@ -1,7 +1,0 @@
-Content-Type: text/x-zim-wiki
-Wiki-Format: zim 0.4
-Creation-Date: 2013-11-29T15:09:21+03:00
-
-android 4.0.4 vital 6c:83:36:db:78:da
-
-//Пятніца 29 Лістапад 2013//

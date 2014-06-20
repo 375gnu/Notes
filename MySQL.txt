@@ -1,0 +1,11 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-05-14T18:21:54+03:00
+
+====== MySQL ======
+Created Серада 14 Травень 2014
+
+show binlog events in 'mysql-bin.000004'\G
+
+bad:
+stop slave;set global sql_slave_skip_counter = 0; start slave;show slave status\G
