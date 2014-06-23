@@ -1,0 +1,17 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-06-20T14:38:33+03:00
+
+====== YUM ======
+Created Пятніца 20 Чэрвень 2014
+
+**Add cdrom as source:**
+
+vi [[/etc/yum.repos.d/cdrom.repo]]
+
+[cdrom]
+name=CDROM Repo
+baseurl=file:///cdrom
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release

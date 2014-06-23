@@ -1,0 +1,14 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-06-20T15:57:57+03:00
+
+====== Oracle ======
+Created Пятніца 20 Чэрвень 2014
+
+on redhat6:
+nano [[/opt/database/stage/cvu/cv/admin/cvu_config]]
+CV_ASSUME_DISTID=OEL4 -> CV_ASSUME_DISTID=OEL6
+
+/u01/app/oracle/product/11.2.3/db_1/bin/dbstart $ORACLE_HOME
+
+/u01/app/oracle/product/11.2.3/db_1/bin/dbshut $ORACLE_HOME
