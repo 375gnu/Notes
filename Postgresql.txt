@@ -1,0 +1,44 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-11-26T20:10:20+03:00
+
+====== Postgresql ======
+Created Серада 26 Лістапад 2014
+
+====== Postgresql Quick Start Mini HOWTO ======
+
+Хуткая настройка Postgresql на прыкладзе праекту edemo.
+'''
+sudo nano /etc/postgresql/9.2/main/postgresql.conf
+listen_addresses = '*'
+'''
+
+
+'''
+sudo -u postgres createdb --encoding=UNICODE --template=template0 edemo
+sudo -u postgres createuser -SDRP edemo
+echo "GRANT ALL ON DATABASE edemo TO edemo;" | sudo -u postgres psql edemo
+#echo "ALTER ROLE edemo PASSWORD 'edemo';" | sudo -u postgres psql edemo
+'''
+
+
+прагледзець актыўныя запыты:
+'''
+select * from pg_stat_activity;
+'''
+ці
+''select * from pg_stat_activity where datname='DBNAME';''
+
+прыбіць падлучэнне да базы DBNAME:
+'''
+select pg_terminate_backend(pg_stat_activity.pid)
+	from pg_stat_activity
+	where pg_stat_activity.datname='DBNAME';
+'''
+
+
+прагледзець спіс баз: ''\l[ist]''
+
+падключыцца да базы (змяніць актыўную базу): ''\c[onnect] [ dbname [ username ] [ host ] [ port ] ]''
+
+прагледзець спіс табліц, паслядоўнасцяў і т.п. у базе: ''\d''
