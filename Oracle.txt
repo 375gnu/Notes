@@ -5,10 +5,54 @@ Creation-Date: 2014-06-20T15:57:57+03:00
 ====== Oracle ======
 Created Пятніца 20 Чэрвень 2014
 
-on redhat6:
-nano [[/opt/database/stage/cvu/cv/admin/cvu_config]]
+====== Installation on redhat6 ======
+
+'''
+nano /opt/database/stage/cvu/cv/admin/cvu_config
 CV_ASSUME_DISTID=OEL4 -> CV_ASSUME_DISTID=OEL6
 
 /u01/app/oracle/product/11.2.3/db_1/bin/dbstart $ORACLE_HOME
 
 /u01/app/oracle/product/11.2.3/db_1/bin/dbshut $ORACLE_HOME
+'''
+
+
+====== Імпарт базы Oracle 11g ======
+
+'''
+su - oracle
+sqlplus sys/<password> as sysdba
+'''
+
+'''
+SQL> shutdown immediate;
+SQL> startup restrict;
+SQL> DROP USER XYZAPP CASCADE;
+SQL> shutdown immediate;
+SQL> startup;
+SQL> CREATE USER XYZAPP
+SQL> IDENTIFIED BY 11111;
+SQL> GRANT CONNECT, RESOURCE TO XYZAPP;
+SQL> GRANT DBA TO XYZAPP;
+SQL> quit
+'''
+
+'''
+imp DBADMIN/11111 file=./xyzapp.dmp log=./imp_tab.log full=y
+'''
+
+
+Карыстальніка DBADMIN зрабілі перад імпартам,  як і XYZAPP, бо дамп быў створаны ад ягонага імя.
+
+===== Заліваем у іншую схему (A4): =====
+
+'''
+SQL> CREATE USER A4 IDENTIFIED BY 1;
+SQL> GRANT CONNECT, RESOURCE, DBA TO A4;
+SQL> quit
+'''
+
+
+'''
+imp DBADMIN/11111 file=./xyzapp.dmp log=./imp_tab.log  fromuser=XYZAPP touser=A4
+'''
