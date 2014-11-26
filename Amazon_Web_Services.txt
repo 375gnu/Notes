@@ -1,0 +1,43 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-11-26T19:53:25+03:00
+
+====== Amazon Web Services ======
+Created Серада 26 Лістапад 2014
+
+====== Уключэнне SSL на балансавальніку нагрузкі ======
+
+[[SSL:On Amazon LB]]
+
+====== Перадача віртуальнай машыны іншаму акаўнту ======
+
+===== Універсальны спосаб =====
+
+1. Трэба мець ''Access Key Id'' і ''Secret Access Key'' для доступу да AWS (https://console.aws.amazon.com/iam/home?#users, «Security Credentials»)
+2. Патрэбна ўсталяваць ''Amazon EC2 Command Line Interface Tools'' (http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/SettingUp_CommandLine.html)
+3. Лепей спыніць віртуалку (можна і не спыняць, тады яна будзе спыненая аўтаматычна)
+4. Выканаць ''ec2-create-image'' (http://docs.amazonwebservices.com/AWSEC2/latest/UserGuide/creating-an-ami-ebs.html): ''$ bin/ec2-create-image --region eu-west-1 -n dwcloud-copy i-80c9f3cd IMAGE ami-af6686d8''
+5. Адкрыць свае AMI, даць доступ да новастворанай ami іншаму карыcтальніку (''Permissions->AWS Account Number'')
+6. Іншаму карыстальніку стварыць новую віртуалку з прыватнай ami, створанай перад гэтым
+
+Спасылкі: http://stackoverflow.com/questions/13447504/how-to-create-a-windows-instance-from-snapshot-in-aws
+
+===== Калі гэта Linux =====
+
+	Працэдура амаль такая ж, але ami можна рабіць са здымка (snapshot)
+
+Спасылкі: http://sebastiannilsson.com/en/blogg/hur-man-flyttar-en-ec2-instance-till-ett-annat-konto/
+
+====== Кланаванне віртуальнай машыны EC2 ======
+
+Кланаванне на Амазоне робіцца па-дурному, таму запісваю тут працэдуру:
+
+1. Робім snapshot патрэбнай віртуалкі
+2. Правяраем тып працэсара: 32 ці 64 бітавы
+3. Ва ўласцівасцях віртуалкі глядзім параметр **Kernel ID**, напрыклад, ''aki-71665e05''
+4. Пераходзім да зробленага snapshot'а
+5. Выбіраем яго і ўверсе становіцца актываванай кнопка «Create Image», тут вельмі важныя 2 моманты: **Architecture** выбіраем такую ж, як на кроку 2, **Kernel ID** выбіраем такі ж, як на кроку 3
+6. Астатняе зразумела без тлумачэнняў
+7. Пераходзім на ''Instances -> Launch instance'', выбіраем тып AMI ''«More Amazon Machine Images»'', ''Continue'', пераходзім на ўкладку ''«My AMIs»''
+
+Калі **Kernel ID** на этапе 5 быў выбраны няправільны, то новая машына можа проста не загрузіцца. **Kernel ID** можна выбраць на кроку 7 (''Edit defaults''), але на зробленай машыне ўжо не атрымаецца (у мяне не атрымалася).
