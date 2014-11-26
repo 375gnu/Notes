@@ -1,0 +1,88 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-11-26T19:16:12+03:00
+
+====== SVN ======
+Created Серада 26 Лістапад 2014
+
+====== SVN to GIT ======
+
+''apt-get install git-svn''
+
+''git svn clone <SVN_REPO> <DST_DIR>''
+
+Неабавязкова:
+можна задаць опцыю ''--authors-file=<filename>'', дзе ''filename'' — спіс, які ставіць адпаведнасць між карыстальнікамі ''svn'' і ''git'', выглядае як
+loginname = Joe User <user@example.com>
+альбо опцыю ''--authors-prog=<filename>'', тут ''filename'' — праграма, якая прымае на ўваход імя карытальніка ў ''svn'' і выдае карыстальніка ''git'' (імя і паштовы адрас)
+
+Правім ''.git/config'', дабаўляем новае месцазнаходжанне на серверы git:
+''git config add remote <NEW_URL>''
+
+Капіруем на сервер:
+''git push remote''
+
+
+====== Перанос SVN з адной машыны на іншую ======
+
+'''
+newbox# cd /path/to/svn/
+newbox# svnadmin create repo
+oldbox# cd /path/to/svn/
+oldbox# svnadmin dump repo | ssh newbox svnadmin dump /path/to/svn/repo
+'''
+
+
+====== Настройка Apache для доступу да рэпазіторыя ======
+
+'''
+newbox# apt-get install libapache2-svn
+newbox# a2enmod ssl
+newbox# a2ensite default-ssl
+'''
+
+
+Правім ''/etc/apache2/mods-available/dav_svn.conf'' каб атрымалася нешта такое:
+
+'''
+<Location /var/svn>
+'''
+	'''
+	SSLRequireSSL
+	# Uncomment this to enable the repository DAV svn
+	# Set this to the path to your repository SVNPath /srv/svn
+	# Alternatively, use SVNParentPath if you have multiple repositories under
+	# under a single directory (/var/lib/svn/repo1, /var/lib/svn/repo2, ...).
+	# You need either SVNPath and SVNParentPath, but not both.
+	#SVNParentPath /var/lib/svn
+	# Access control is done at 3 levels: (1) Apache authentication, via
+	# any of several methods. A "Basic Auth" section is commented out
+	# below. (2) Apache <Limit> and <LimitExcept>, also commented out
+	# below. (3) mod_authz_svn is a svn-specific authorization module
+	# which offers fine-grained read/write access control for paths
+	# within a repository. (The first two layers are coarse-grained; you
+	# can only enable/disable access to an entire repository.) Note that
+	# mod_authz_svn is noticeably slower than the other two layers, so if
+	# you don't need the fine-grained control, don't configure it.
+	# Basic Authentication is repository-wide. It is not secure unless
+	# you are using https. See the 'htpasswd' command to create and
+	# manage the password file - and the documentation for the
+	# 'auth_basic' and 'authn_file' modules, which you will need for this
+	# (enable them with 'a2enmod').
+	AuthType Basic
+	AuthName "*instinctools' subversion repository"
+	AuthUserFile /srv/svn/conf/svn-auth-file
+	Require valid-user
+	# Dunno SetOutputFilter DEFLATE
+	# To enable authorization via mod_authz_svn #AuthzSVNAccessFile /etc/apache2/dav_svn.authz
+	# The following three lines allow anonymous read, but make
+	# committers authenticate themselves. It requires the 'authz_user'
+	# module (enable it with 'a2enmod').
+	#<LimitExcept GET PROPFIND OPTIONS REPORT>
+	#	Require valid-user
+	#</LimitExcept>
+	</Location>
+	'''
+
+
+Дзякуючы параметру ''SSLRequireSSL'' рэпазіторый будзе даступны толькі праз HTTPS.

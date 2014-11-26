@@ -1,0 +1,7 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-11-26T19:12:53+03:00
+
+====== VCS ======
+Created Серада 26 Лістапад 2014
+

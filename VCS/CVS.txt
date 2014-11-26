@@ -1,0 +1,61 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-11-26T19:23:56+03:00
+
+====== CVS ======
+Created Серада 26 Лістапад 2014
+
+====== Аўтарызацыя доступу да CVS праз Active Directory ======
+
+Перад гэтымі настройкамі патрэбна настроіць Samba & Winbind.
+
+Самы просты варыянт, калі выкарыстоўваецца Debian, бо ў ім CVS мае падтрымку PAM.
+
+===== Базавыя настройкі (на ўсялякі выпадак) =====
+
+Ставім пакеты, правяраем правы доступу (cvs.dpkg — каталог, створаны пакетам, cvs — разгорнуты з рэзервовай копіі):
+'''
+root@linux6:/usr/share/doc/cvs# ls -l /srv/
+total 8
+drwxrwsr-x 29 cvs  instinctools 4096 Jan 20  2010 cvs
+drwxrwsr-x  3 root src          4096 Apr 23 12:24 cvs.dpkg
+'''
+
+
+Звяртаем увагу на ''g+s''. Усе ўкладзеныя каталогі таксама павінныя мець такія ж правы.
+
+Можа спатрэбіцца зрабіць наступнае:
+'''
+for i in config,v config .#config commitinfo,v commitinfo .#commitinfo; do
+ cp /srv/cvs{.dpkg,}/CVSROOT/$i
+done
+'''
+
+
+Робім сімлінк ''/var/cvsroot'' на ''/srv/cvs''. Правім настройкі ''cvs-pserver'':
+'''
+nano /etc/cvs-pserver.conf
+#CVS_PSERV_REPOS="/srv/cvs"
+CVS_PSERV_REPOS="/var/cvsroot"
+'''
+
+
+Шмат дзе выкарыстоўваецца карыстальнік `www', яго трэба дабавіць, а пасля задаць яму правільны пароль.
+'''
+adduser --system www
+addgroup www instinctools
+'''
+
+
+Дадаём патрэбны запіс у ''/etc/inetd.conf'':
+''cvspserver      stream  tcp     nowait.400      cvs     /usr/sbin/tcpd  /usr/sbin/cvs-pserver''
+
+Праверка:
+'''
+export CVSROOT=:pserver:linux6:/var/cvsroot/
+cvs login
+cvs co Cvstest
+'''
+
+
+Калі правільна настроеная агульнасістэмная аўтарызацыя ў Active Directory, то ўсё павінна працаваць.

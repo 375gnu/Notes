@@ -1,0 +1,215 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-11-26T19:26:30+03:00
+
+====== SVN+AD ======
+Created Серада 26 Лістапад 2014
+
+====== Аўтарызацыя доступу да SVN праз Active Directory ======
+
+Тут складаней чым з CVS, бо патрэбная настройка ''Cyrus SASL''.
+
+Ставім патрэбныя пакеты: ''subversion, libsasl2-modules-ldap, sasl2-bin''.
+
+Дадаём карыстальніка й групу:
+'''
+root@linux6:/srv# adduser --system svn
+root@linux6:/srv# addgroup --system svn
+root@linux6:/srv# addgroup svn svn
+root@linux6:/srv# addgroup svn sasl
+'''
+
+
+Дадаём патрэбны запіс у /etc/inetd.conf:
+''svn             stream  tcp     nowait.400      svn     /usr/sbin/tcpd  /usr/bin/svnserve --inetd --root=/srv/svn''
+
+Правяраем, што на працоўны каталог ''saslauthd'' стаяць правільныя правы:
+''dpkg-statoverride --list /var/run/saslauthd''
+
+Калі трэба, то выпраўляем іх:
+''dpkg-statoverride --add root sasl 710 /var/run/saslauthd''
+
+Абавязкова з дапамогай ''dpkg-statoverride'', каб захаваліся пасля абнаўлення пакунку!
+
+===== Настройваем saslauthd =====
+
+==== Варыянт 1 (горшы) ====
+
+=== /etc/default/saslauthd ===
+
+Паказаныя толькі змены:
+'''
+START=yes
+MECHANISMS="ldap"
+'''
+
+
+=== /etc/saslauthd.conf ===
+
+Увесь файл:
+'''
+# Your AD server adress
+ldap_servers: ldap://server.instinctools.ru
+#
+# I love default domain name, I just want to put the username part for #my authentication #not the whole user@domain.local
+ldap_default_domain: instinctools.ru
+#
+# Where are the users located in the AD?  If you haven't change the default tree of your AD it should be under the Users OU.
+ldap_search_base: OU=it-users,DC=instinctools,DC=ru
+#
+# You need a user account to be able to make the authentication in the Active Directory, I suggest you create a user just for that!
+ldap_bind_dn: КАРЫСТАЛЬНІК-ДЛЯ-LDAP@instinctools.ru
+#
+# Of course there is a password associated with this user, put it here :
+ldap_bind_pw: ПАРОЛЬ-ДЛЯ-LDAP
+#
+# Misc options for LDAP to make it work with Microsoft AD.  Nothing to change here, move along...
+ldap_deref: never
+ldap_restart: yes
+ldap_scope: sub
+ldap_use_sasl: no
+ldap_start_tls: no
+ldap_version: 3
+ldap_auth_method: bind
+ldap_filter: sAMAccountName=%u
+ldap_password_attr: userPassword
+ldap_timeout: 10
+ldap_cache_ttl: 30
+ldap_cache_mem: 32768
+'''
+
+
+Ставім правы:
+''-r-------- 1 root root 1030 Apr 23 17:34 saslauthd.conf''
+
+=== svn.conf ===
+
+У Debian ён знаходзіцца ў ''/etc/sasl'' або ''/usr/lib/sasl2'', у іншых, можа знаходзіцца ў ''/etc/sasl2'':
+'''
+pwcheck_method: saslauthd
+auxprop_plugin: ldap
+mech_list: PLAIN
+saslauthd_path: /var/run/saslauthd/mux
+ldapdb_uri: ldap://
+'''
+
+
+==== Варыянт 2 (лепшы) ====
+
+=== /etc/default/saslauthd ===
+
+Паказаныя толькі змены:
+'''
+START=yes
+MECHANISMS="pam"
+'''
+
+
+=== /etc/saslauthd.conf ===
+
+Непатрэбны, ён толькі для ldap.
+
+=== svn.conf ===
+
+У Debian ён знаходзіцца ў ''/etc/sasl'' або ''/usr/lib/sasl2'', у іншых, можа знаходзіцца ў ''/etc/sasl2'':
+'''
+pwcheck_method: saslauthd
+mech_list: PLAIN
+'''
+
+
+=== Дадатковыя (несістэмныя) карыстальнікі ===
+
+Ствараем файл ''/etc/pam.d/svn'':
+'''
+#
+# /etc/pam.d/svn - specify the PAM behaviour of SVN
+#
+
+auth    sufficient pam_userdb.so db=/srv/svn/conf/passwd crypt=none try_first_pass unknown_ok
+account sufficient pam_userdb.so db=/srv/svn/conf/passwd crypt=none try_first_pass unknown_ok
+
+# We fall back to the system default in /etc/pam.d/common-*
+
+@include common-auth
+@include common-account
+
+# We don't use password or session modules at all
+# @include common-password
+# @include common-session
+'''
+
+
+**Важна**: файл, які перадаецца ў параметры db, мае фармат Berkley DB. Гэты файл павінен мець пашырэнне db, але ў параметры павінен перадавацца **без** .db, іначай ў лог auth.log будуць сыпацца памылкі накшталт наступнай:
+''Apr 24 12:23:49 linux6 saslauthd[8221]: pam_userdb(svn:auth): user_lookup: could not open database `/srv/svn/conf/passwd.db': No such file or directory''
+
+Гэта звязана з тым, што ''pam_userdb.so'' сам дабаўляе патрэбнае пашырэнне, г.зн. у сапраўднасці ён спрабуе адкрыць файл ''/srv/svn/conf/passwd.db.db'' (падобныя паводзіны мае, напрыклад, postfix з рознымі maps).
+
+Файл базы пароляў ствараецца з дапамогай утыліты db_load (db4.8_load ці іншае імя):
+''db4.8_load -T -t hash passwd.db < passwd''
+
+Зыходны файл passwd павінен мець наступны фармат:
+'''
+лагін1
+пароль1
+лагін2
+пароль2
+лагін3
+пароль3
+'''
+
+
+Ніякіх каментароў ці пустых радкоў!
+
+З арыгінальнага passwd svn базу можна атрымаць вось так:
+''grep = passwd | awk -F' = ' '{print $1; print $2}' | db4.8_load -T -t hash passwd.db''
+
+Паролі можна шыфраваць утылітай crypt, тады трэба памяняць параметр crypt у pam_userdb.so, гл. man pam_userdb.
+
+===== Настройка svn =====
+
+==== /srv/svn/conf/svnserve.conf ====
+
+'''
+[general]
+### These options control access to the repository for unauthenticated
+### and authenticated users.  Valid values are "write", "read",
+### and "none".  The sample settings below are the defaults.
+anon-access = none
+auth-access = write
+### The password-db option controls the location of the password
+### database file.  Unless you specify a path starting with a /,
+### the file's location is relative to the conf directory.
+### Uncomment the line below to use the default password file.
+#password-db = passwd
+### The authz-db option controls the location of the authorization
+### rules for path-based access control.  Unless you specify a path
+### starting with a /, the file's location is relative to the conf
+### directory.  If you don't specify an authz-db, no path-based access
+### control is done.
+### Uncomment the line below to use the default authorization file.
+authz-db = authz
+### This option specifies the authentication realm of the repository.
+### If two repositories have the same authentication realm, they should
+### have the same password database, and vice versa.  The default realm
+### is repository's uuid.
+realm = Instinctools
+
+[sasl]
+### Tell Subversion to use SASL for the authentication mechanism
+use-sasl = true
+### Make sure that there is no encryption for the authentication mechanism
+min-encryption = 0
+max-encryption = 0
+'''
+
+
+==== На кліенцкім баку ====
+
+На віндовых машынах для працы кліента SVN Eclipse патрэбна паставіць утыліты з [[http://www.collab.net/downloads/subversion|collab.net]].
+
+===== Карысныя спасылкі =====
+
+[[https://www.linux.org.ru/wiki/en/%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0_SVN_%D0%B2%D0%BC%D0%B5%D1%81%D1%82%D0%B5_%D1%81_LDAP|Настройка SVN вместе с LDAP]]
+
+[[http://www.sendmail.org/ca/email/cyrus2/options.html|Options for Cyrus SASL]]
