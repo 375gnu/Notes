@@ -158,8 +158,7 @@ account sufficient pam_userdb.so db=/srv/svn/conf/passwd crypt=none try_first_pa
 пароль3
 '''
 
-
-Ніякіх каментароў ці пустых радкоў!
+**Ніякіх каментароў ці пустых радкоў!**
 
 З арыгінальнага passwd svn базу можна атрымаць вось так:
 ''grep = passwd | awk -F' = ' '{print $1; print $2}' | db4.8_load -T -t hash passwd.db''
