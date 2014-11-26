@@ -1,0 +1,191 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-11-26T19:38:34+03:00
+
+====== SSL+GOST ======
+Created Серада 26 Лістапад 2014
+
+====== SSL і крыптаграфія ГОСТ 3410 ======
+
+===== Зборка =====
+
+Патрэбныя патчы і інструкцыі глядзім на http://www.cryptocom.ru/opensource/index.html
+
+Спачатку я спрабаў сабраць deb'ы з гэтымі патчамі, але apache падаў з-за збою сегментацыі ў модулі ''mod_ssl'' (у openssl вельмі жорскія патрабаванні да ABI).
+
+Таму ў выніку сабраў тыя версіі, якія тэставаліся Крыптакомам і паставіў іх /opt/gost.
+
+Такім чынам, збіраем openssl 1.0.0:
+''./config shared zlib enable-rfc3779 --prefix=/opt/gost make depend && make && make test && make install''
+
+Збіраем apache (на момант напісання Крыптаком распаўсюджваў патч для 2.2.23):
+''patch -p1 < apache-2.2.23-openssl-1.0.1c.diff ./configure --enable-ssl --with-ssl=/opt/gost --prefix=/opt/gost''
+або
+''./configure --enable-mods-shared="all ssl" --with-ssl=/opt/gost --prefix=/opt/gost make && make install''
+
+Важны момант: prefix павінен быць як with-ssl, іначай пры запуску апач падхопіць сістэмныя бібліятэкі openssl і зваліцца. Альбо пры канфігурацыі задаем пераменную акружэння ''LDFLAGS=-Wl,-rpath,/opt/gost'' (больш правільны варыянт).
+
+===== Настройка openssl =====
+
+У **самы пачатак** файла ''/opt/gost/ssl/openssl.cnf'' дабаўляем радок:
+'''
+openssl_conf = openssl_def
+'''
+
+
+А ў **канец**:
+'''
+[openssl_def]
+engines = engine_section
+[engine_section]
+gost = gost_section
+[gost_section]
+engine_id = gost
+default_algorithms = ALL
+CRYPT_PARAMS = id-Gost28147-89-CryptoPro-A-ParamSet
+'''
+
+
+Бібліятэка ''libgost.so'' павінная грузіцца аўтаматычна, але, калі не грузіцца, то трэба ў секцыю ''gost_section'' дадаць радок
+''dynamic_path = /opt/gost/lib/engines/libgost.so''
+другім радком адразу за радком ''engine_id = gost''.
+
+**Важна**: калі для падтрымкі ГОСТ настройваецца сістэмная ''openssl'', то ''dynamic_path'' трэба задаваць абавязкова, бо іначай могуць не працаваць некаторыя іншыя праграмы, напрыклад ''host''.
+
+===== Настройка Apache2 =====
+
+Узята з http://www.cryptocom.ru/opensource/apache.html:
+В файле ''httpd.conf'' раскомментировать блок
+'''
+# Secure (SSL/TLS) connections
+Include conf/extra/httpd-ssl.conf
+'''
+
+В файле ''conf/extra/httpd-ssl.conf'' добавить:
+в SSL Global Context
+'''
+## SSL Global Context
+## All SSL configuration in this context applies both to
+## the main server and all SSL-enabled virtual hosts.
+SSLCryptoDevice gost
+'''
+
+в секции настройки виртуального хоста указать шифрсьют:
+'''
+SSLCipherSuite HIGH:MEDIUM:+GOST2001-GOST89
+'''
+в этой же секции указать сертификат сервера и закрытый ключ:
+'''
+SSLCertificateFile "/opt/httpd/conf/apache.gost.ru.crt"
+CertificateKeyFile "/opt/httpd/conf/apache.gost.ru.key"
+'''
+
+
+Для праверкі кліенцкіх сертыфікатаў (аўтэнтыфікацыі па сертыфікаце) патрэбна яшчэ дадаць
+'''
+# уключыць праверку кліенцкіх сертыфікатаў
+SSLVerifyClient require
+# шлях да файла з сертыфікатам CA
+SSLCACertificateFile "/etc/apache2/ssl/ca_root.cer"
+'''
+
+
+===== Генерацыя серверных і кліенцкіх сертыфікатаў і ключоў =====
+
+==== Падрыхтоўка ====
+
+Наступныя каманды патрэбныя для карэктнай работы openssl ca.
+'''
+mkdir demoCA
+mkdir demoCA/newcerts
+mkdir demoCA/private
+touch demoCA/index.txt
+echo 01 > demoCA/serial
+'''
+
+
+==== Стварэнне уласнай CA ====
+
+# стварэнне прыватнага ключа CA
+'''
+openssl genpkey -algorithm gost2001 -pkeyopt paramset:A -out ca_root.pem
+'''
+# стварэнне самападпісанага сертыфікату
+'''
+openssl req \
+'''
+	'''
+	-new \
+	-x509 \
+	-days 3650 \
+	-key ca_root.pem \
+	-out ca_root.cer -subj
+	'''
+
+# экспарт сертыфікату (і ключа?) у файл фармату pkcs12 (неабавязкова)
+'''
+openssl pkcs12 \
+'''
+	'''
+	-export \
+	-inkey ca_root.pem \
+	-in ca_root.cer \
+	-keypbe gost89 \
+	-certpbe gost89 \
+	-macalg md_gost94 \
+	-out ca_root.p12 \
+	-passout pass:пароль
+	'''
+
+# стварэнне сертыфікатаў для кліентаў
+'''
+export CERT=client1
+'''
+# ствараем новы сертыфікат і новы ключ
+'''
+openssl req \
+'''
+	'''
+	-newkey gost2001 \
+	-pkeyopt paramset:A \
+	-keyout ${CERT}.pem \
+	-nodes \
+	-out ${CERT}.csr
+	'''
+
+# падпісваем у CA
+'''
+openssl ca \
+'''
+	'''
+	-policy policy_anything \
+	-days 3650 \
+	-keyfile /root/ca_root.pem \
+	-cert /root/ca_root.cer \
+	-in ${CERT}.csr \
+	-out ${CERT}.cer
+	'''
+
+# ствараем pkcs12 каб аддаць кліенту
+'''
+openssl pkcs12 \
+'''
+	'''
+	-export \
+	-inkey ${CERT}.pem \
+	-in ${CERT}.cer \
+	-keypbe gost89 \
+	-certpbe gost89 \
+	-macalg md_gost94 \
+	-out ${CERT}.p12 \
+	-passout pass:пароль
+	'''
+
+
+==== Праверка ====
+
+Збіраем wget з патчам ад Крыптаком:
+''./configure --with-libssl-prefix=/opt/gost --prefix=/opt/gost make && make install''
+
+Спрабуем забраць файл з сервера:
+''./wget https://gost-srv.instinctools.ru/ --ca-certificate=/etc/apache2/ssl/ca_root.cer --certificate=/root/ca_1.cer --private-key=/root/ca_1.pem''

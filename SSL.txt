@@ -1,0 +1,46 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-11-26T19:36:23+03:00
+
+====== SSL ======
+Created Серада 26 Лістапад 2014
+
+====== Генерацыя запыту на сертыфікат ======
+
+===== З дапамогай openssl =====
+
+''openssl req -newkey rsa -pkeyopt rsa_keygen_bits:2048 -keyout ${KEY_NAME}.pem -nodes  -out ${KEY_NAME}.csr''
+
+===== З дапамогай java keytool =====
+
+'''
+#!/bin/sh
+
+CN='Gunthilde Sohn'
+OU=Headquarters
+O='instinctools GmbH'
+L=Stuttgart
+ST='Badden Wurttemberg'
+C=DE
+
+KEYSTORE='./itools.keystore'
+ALIAS=dwcloud2014
+
+OUTFILE='./dwcloud2014.csr'
+
+keytool -genkey -keyalg rsa -keystore $KEYSTORE -alias $ALIAS -keysize 2048 -dname "cn=$CN, ou=$OU, o=$O, l=$L, st=$ST, c=$C"
+
+keytool -certreq -file $OUTFILE -keystore $KEYSTORE -alias $ALIAS
+'''
+
+
+===== Імпарт сертыфікату ў java keystore =====
+
+Для падпісвання коду ditaworks:
+
+Імпартуем прамежкавы сертыфікат (Symantec дасылае яго), трэба зрабіць толькі першы раз :
+''keytool -import -keystore $KEYSTORE -file $FILE_WITH_IM_CERT''
+
+Імпартуем новы сертыфікат для падпісвання коду:
+''keytool -import -trustcacerts -keystore $KEYSTORE -alias $ALIAS -file $FILE_WITH_CERT''
+

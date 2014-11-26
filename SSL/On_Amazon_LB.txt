@@ -1,0 +1,16 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-11-26T19:52:04+03:00
+
+====== On Amazon LB ======
+Created Серада 26 Лістапад 2014
+
+===== SSL on Amazon LoadBalancer =====
+
+Для my.utrail.me былі закупленыя сертыфікаты у Comodo, на Амазоне можна дабавіць прыватны ключ і сертыфікат прама ў LB, але іх інфраструктура не распазнае любыя файлы, таму трэба прывесці іх да патрэбнага ім выгляду.
+
+	Ствараем «правільны» прыватны ключ: ''openssl rsa -in privkey.pem -text'', капіруем усё ад ''-----BEGIN RSA PRIVATE KEY-----'' да ''-----END RSA PRIVATE KEY-----''
+	Аналагічна з сертыфікатам: ''openssl x509 -inform PEM -in my_utrail_me.crt''
+	І ланцужком даверу: ''openssl x509 -inform PEM -in PositiveSSLCA2.crt ; openssl x509 -inform PEM -in AddTrustExternalCARoot.crt''
+
+Больш інфы тут: http://www.nczonline.net/blog/2012/08/15/setting-up-ssl-on-an-amazon-elastic-load-balancer/
