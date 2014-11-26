@@ -5,7 +5,13 @@ Creation-Date: 2014-05-14T18:21:54+03:00
 ====== MySQL ======
 Created Серада 14 Травень 2014
 
-show binlog events in 'mysql-bin.000004'\G
+====== Змена знаказбору ======
 
-bad:
-stop slave;set global sql_slave_skip_counter = 0; start slave;show slave status\G
+На прыкладзе Ifos, для яго база і табліцы ў ёй ствараюцца ў ''latin1'', хаця самі даныя перадаюцца ў ''utf-8'' (гл. ''SET NAMES utf8'' у самым пачатку дампа).
+
+1. Трэба атрымаць дамп без ''SET NAMES utf8'': ''mysqldump --default-character-set=latin1 --skip-set-charset …''.
+2. Памяняць ''DEFAULT CHARSET=latin1'' на ''DEFAULT CHARSET=utf8.''
+3. Заліць дамп.
+
+Калі даныя ў табліцы запісаныя нармальна, напрыклад, база ў ''cp1251'', то даецца крок
+2.5. Перакадаваць дамп у ''utf8'': ''iconv -f cp1251 -t utf8 from.sql > to.sql.''

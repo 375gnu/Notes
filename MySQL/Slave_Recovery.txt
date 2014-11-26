@@ -1,0 +1,82 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+Creation-Date: 2014-11-26T20:02:45+03:00
+
+====== Slave Recovery ======
+Created Серада 26 Лістапад 2014
+
+
+
+Пры перазапуску слэйв MySQL можа выдаць у лог памылку 1146 і рэплікацыя будзе спыненая:
+'''
+140503  0:36:10 [ERROR] Slave SQL: Error 'Table 'cms.temp_result2' doesn't exist' on query. Default database: 'cms'. Query: 'INSERT IGNORE INTO GROUP_ASSIGNMENTS SELECT * FROM TEMP_RESULT2', Error_code: 1146
+140503  0:36:10 [Warning] Slave: Table 'cms.temp_result2' doesn't exist Error_code: 1146
+140503  0:36:10 [ERROR] Error running query, slave SQL thread aborted. Fix the problem, and restart the slave SQL thread with "SLAVE START". We stopped at log 'mysql-bin.001414' position 492179654
+'''
+
+
+Такую ж інфармацыю паказвае ''show slave status\G'' (палі ''Master_Log_File, Read_Master_Log_Pos, Last_IO_Errno, Last_IO_Error'').
+
+Ёсць 3 варыянты рашэння гэтай праблемы:
+
+1. Ініцыялізацыя слэйва з нуля, дае гарантавана кансістэнтны слэйв, але вялікі прастой мастэра
+2. Пропуск праблемных падзей, гадзіцца толькі тады, калі запіс ідзе толькі ў часовую табліцу (''INSERT INTO temp_table''...), а не ў пастаянную (''INSERT INTO table SELECT FROM temp_table''...)
+3. Ручная сінхранізацыя
+
+===== Прапусканне праблемных падзей =====
+
+**Нельга выкарыстоўваць гэты метад, калі ён прывядзе да некансістэнтнасці даных!**
+
+'''
+set global sql_slave_skip_counter = N;
+start slave;
+show slave status\G
+'''
+
+
+Тут N — колькасць падзей, якія трэба прапусціць, пачынаем з 1, калі рэплікацыя спыняецца, то павялічваем на 1, пакуль не запусціцца рэплікацыя. Пасля паспяховага запуску рэплікацыі, абнуляем ''sql_slave_skip_counter'':
+'''
+set global sql_slave_skip_counter = 0;
+'''
+
+
+===== Ручная сінхранізацыя =====
+
+У логах слэйва (таксама ў вывадзе ''SHOW SLAVE STATUS'') маем назву бінарнага лога і пазіцыі ў ім, на якіх спынілася рэплікацыя. На мастэры глядзім на вывад ''show binlog events in 'mysql-bin.000004'\G'', замест ''mysql-bin.000004'' падстаўляем патрэбную назву бінарнага лога. Шукаем каля праблемнай пазіцыі запыт на стварэнне часовай табліцы і запаўненне яе, будзе прыблізна наступнае:
+   ''Log_name: mysql-bin.000011''
+''        Pos: 106''
+'' Event_type: Query''
+''  Server_id: 202''
+''End_log_pos: 198''
+''       Info: create temporary table cms.temp_t1 (a int)''
+''*************************** 3. row ***************************''
+''   Log_name: mysql-bin.000011''
+''        Pos: 198''
+'' Event_type: Query''
+''  Server_id: 202''
+''End_log_pos: 294''
+''       Info: insert into cms.temp_t1 values (1111)''
+''*************************** 4. row ***************************''
+''   Log_name: mysql-bin.000011''
+''        Pos: 294''
+'' Event_type: Query''
+''  Server_id: 202''
+''End_log_pos: 390''
+''       Info: insert into cms.temp_t1 values (2222)''
+
+На слэйве ствараем патрэбную табліцу і запаўняем яе:
+'''
+create table cms.temp_t1 (a int);
+insert into cms.temp_t1 values (1111)
+insert into cms.temp_t1 values (2222)
+'''
+
+
+Звяртаю ўвагу на **адсутнасць** ''temporary'': калі зрабіць часовую табліцу, яна не будзе бачная ''IO_Thread'' (яны лакальныя адносна сесіі).
+
+Запушчаем частковую рэплікацыю, замест ''log_name'' і ''log_pos'' падстаўляем рэальныя даныя, узятыя з логу або ''show slave status'':
+'''
+START SLAVE UNTIL MASTER_LOG_FILE = 'log_name', MASTER_LOG_POS = log_pos
+'''
+
+Правяраем на **мастэры**, што праблемная табліца болей не выкарыстоўваецца, выдаляем на слэйве створаную ўручную табліцу, робім нармальны запуск рэплікацыі (''START SLAVE''). Калі яна яшчэ патрэбная, то перазапушчаем з большым значэннем ''MASTER_LOG_POS'', правільныя значэнні глядзім у полі ''End_log_pos''.
