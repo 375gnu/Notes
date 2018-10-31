@@ -5,7 +5,7 @@ Creation-Date: 2014-06-20T15:38:28+03:00
 ====== X11 ======
 Created Пятніца 20 Чэрвень 2014
 
-X11 forwarding
+===== X11 forwarding =====
 server: 
 apt-get install xauth
 enable forwarding in sshd_config
@@ -14,3 +14,11 @@ enable forwarding in sshd_config
 munich-airport/unix:10  MIT-MAGIC-COOKIE-1  1041f3bba425d22fef0231ae42539354
 su - oracle
 xauth add munich-airport/unix:10  MIT-MAGIC-COOKIE-1  1041f3bba425d22fef0231ae42539354
+
+
+===== Disable QXcbConnection: XCB error:… errors in Qt applications =====
+# cat /etc/xdg/QtProject/qtlogging.ini 
+'''
+[Rules]
+qt.qpa.xcb.xcberror=false
+'''
